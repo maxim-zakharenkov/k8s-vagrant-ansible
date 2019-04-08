@@ -83,7 +83,7 @@
         path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
         insertafter: \[Service\]
         content: |
-          Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_eth1.ipv4.address }}""
+          Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_eth1.ipv4.address }}"
 
   - name: daemon-reload
     command: systemctl daemon-reload
