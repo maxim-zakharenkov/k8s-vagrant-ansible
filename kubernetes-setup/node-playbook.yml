@@ -43,14 +43,14 @@
       name: vagrant
       group: docker
 
- - name: Remove swapfile from /etc/fstab
-   mount:
-     name: "{{ item }}"
-     fstype: swap
-     state: absent
-   with_items:
-     - swap
-     - none
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+      - swap
+      - none
 
   - name: Disable swap
     command: swapoff -a
@@ -77,6 +77,19 @@
         - kubelet
         - kubeadm
         - kubectl
+
+  - name: Insert IP address to kubelet service config
+    blockinfile:
+        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        insertafter: \[Service\]
+        content: |
+          Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_eth1.ipv4.address }}""
+
+  - name: daemon-reload
+    command: systemctl daemon-reload
+
+  - name: restart kubelet
+    command: systemctl restart kubelet
 
   - name: Copy the join command to server location
     copy: src=join-command dest=/tmp/join-command.sh mode=0777

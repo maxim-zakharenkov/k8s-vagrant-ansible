@@ -15,7 +15,6 @@ Vagrant.configure("2") do |config|
         master.vm.hostname = "k8s-master"
         master.vm.provision "ansible" do |ansible|
             ansible.playbook = "kubernetes-setup/master-playbook.yml"
-	    ansible.ask_become_pass = true
         end
     end
 

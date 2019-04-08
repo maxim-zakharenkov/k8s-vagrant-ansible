@@ -81,6 +81,19 @@
   - name: Initialize the Kubernetes cluster using kubeadm
     command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10"  --node-name k8s-master --pod-network-cidr=192.168.0.0/16
 
+  - name: Insert IP address
+    blockinfile:
+        path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+        insertafter: \[Service\]
+        content: |
+          Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_eth1.ipv4.address }}""
+
+  - name: daemon-reload
+    command: systemctl daemon-reload
+
+  - name: restart kubelet
+    command: systemctl restart kubelet
+
   - name: Setup kubeconfig for vagrant user
     command: "{{ item }}"
     with_items:
@@ -100,6 +113,7 @@
       msg: "JOIN command: {{ join_command.stdout_lines[0] }}"
 
   - name: Copy join command to local file
+    become: false
     local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
 
   handlers:
